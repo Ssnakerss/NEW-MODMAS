@@ -12,12 +12,11 @@ interface Props {
 
 export const Cell: React.FC<Props> = React.memo(({ row, field, canEdit, onUpdate }) => {
   const { editingCell, setEditingCell, clearEditingCell } = useSpreadsheetStore();
-  const [localValue, setLocalValue] = useState<unknown>(null);
+  const rawValue = row[field.column_name];
+  const [localValue, setLocalValue] = useState<unknown>(rawValue);
 
   const isEditing =
     editingCell?.rowId === row._id && editingCell?.fieldId === field.id;
-
-  const rawValue = row[field.column_name];
 
   const startEdit = useCallback(() => {
     if (!canEdit) return;

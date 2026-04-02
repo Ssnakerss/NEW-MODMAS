@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { spreadsheetsApi } from '../api/spreadsheets';
@@ -23,12 +23,14 @@ export const SpreadsheetPage: React.FC = () => {
   const [addFieldOpen, setAddFieldOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  const { isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['spreadsheet', id],
     queryFn: () => spreadsheetsApi.get(id!),
-    onSuccess: setSpreadsheet,
     enabled: Boolean(id),
   });
+  useEffect(() => {
+    if (data) setSpreadsheet(data);
+  }, [data]);
 
   const { allRows, fetchNextPage, hasNextPage, isFetchingNextPage, createRow, updateRow, deleteRow } = useRows(id!);
 
@@ -83,8 +85,16 @@ export const SpreadsheetPage: React.FC = () => {
                 variant="danger"
                 size="sm"
                 onClick={async () => {
-                  for (const rowId of selectedRowIds) await deleteRow.mutateAsync(rowId);
-                  clearSelection();
+                  const results = await Promise.allSettled(
+                    Array.from(selectedRowIds).map(rowId => deleteRow.mutateAsync(rowId))
+                  );
+                  const failed = results.filter(r => r.status === 'rejected');
+                  if (failed.length === 0) {
+                    clearSelection();
+                  } else {
+                    console.error(`Failed to delete ${failed.length} rows`, failed);
+                    // Можно показать toast, но пока просто оставляем выбор
+                  }
                 }}
               >
                 Удалить выбранные

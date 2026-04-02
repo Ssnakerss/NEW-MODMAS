@@ -82,6 +82,7 @@ export interface SpreadsheetAccess {
   can_edit: boolean;
   can_delete: boolean;
   can_manage: boolean;
+  role?: PermissionRole;
 }
 
 export interface FieldAccess {
@@ -89,6 +90,7 @@ export interface FieldAccess {
   principal_id: string;
   can_view: boolean;
   can_edit: boolean;
+  access?: 'view' | 'edit' | 'none';
 }
 
 
@@ -125,18 +127,9 @@ export interface SpreadsheetPermission {
   fieldPermissions?: FieldPermission[];
 }
 
-export interface SpreadsheetAccess {
-  id: string;
-  principal_id: string;
-  principal_name: string;
-  role: PermissionRole;
-}
 
-export interface FieldAccess {
-  field_id: string;
-  principal_id: string;
-  access: 'view' | 'edit' | 'none';
-}
+
+
 
 // export interface RowAccessRule {
 //   id: string;

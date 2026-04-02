@@ -4,8 +4,9 @@ import { NumberEditor } from './NumberEditor';
 import { BooleanEditor } from './BooleanEditor';
 import { DateEditor } from './DateEditor';
 import { SelectEditor } from './SelectEditor';
+import { RelationEditor } from './RelationEditor';
 
-export { TextEditor, NumberEditor, BooleanEditor, DateEditor, SelectEditor };
+export { TextEditor, NumberEditor, BooleanEditor, DateEditor, SelectEditor, RelationEditor };
 
 export function getEditor(fieldType: FieldType) {
   const map: Partial<Record<FieldType, unknown>> = {
@@ -21,6 +22,7 @@ export function getEditor(fieldType: FieldType) {
     datetime: DateEditor,
     select: SelectEditor,
     multi_select: SelectEditor,
+    relation: RelationEditor,
   };
   return map[fieldType] ?? TextEditor;
 }
