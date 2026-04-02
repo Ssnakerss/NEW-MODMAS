@@ -1,0 +1,417 @@
+/* ─── Tailwind directives ─────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS Custom Properties ───────────────────────────────── */
+:root {
+  --color-primary:        #2563eb;
+  --color-primary-hover:  #1d4ed8;
+  --color-danger:         #dc2626;
+  --color-border:         #e5e7eb;
+  --color-bg:             #f9fafb;
+  --color-surface:        #ffffff;
+  --color-text:           #111827;
+  --color-text-muted:     #6b7280;
+
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+
+  --shadow-sm:  0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  --font-sans:  'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+}
+
+/* ─── Base Reset ──────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;    /* 14px */
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Убираем стандартные стили кнопок */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Убираем стандартные стили инпутов */
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  /* Скроллбар — WebKit */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Скроллбар — Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+  }
+
+  /* Выделение текста */
+  ::selection {
+    background-color: #bfdbfe;
+    color: #1e3a5f;
+  }
+
+  /* Фокус — доступность */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Убираем outline при клике мышью */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Ссылки */
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* Изображения */
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Таблицы */
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  /* Моноширинный текст */
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+}
+
+/* ─── Компонентные утилиты ────────────────────────────────── */
+@layer components {
+
+  /* Сетка таблицы — фиксируем высоту строк */
+  .grid-row {
+    @apply flex border-b border-gray-100;
+    height: 36px;
+    min-height: 36px;
+  }
+
+  .grid-cell {
+    @apply flex items-center px-2 border-r border-gray-200 overflow-hidden;
+    min-height: 36px;
+  }
+
+  .grid-header-cell {
+    @apply flex items-center px-2 border-r border-gray-200 bg-gray-50 select-none;
+    height: 36px;
+  }
+
+  /* Значок типа поля */
+  .field-type-icon {
+    @apply text-xs font-mono text-gray-400 shrink-0 w-5 text-center;
+  }
+
+  /* Бейдж для select-значений */
+  .select-badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap;
+  }
+
+  /* Карточка таблицы на странице Workspaces */
+  .spreadsheet-card {
+    @apply bg-white rounded-xl border border-gray-200 p-5 text-left
+           transition-all duration-150 cursor-pointer
+           hover:border-blue-400 hover:shadow-md;
+  }
+
+  /* Строка таблицы прав */
+  .permission-row {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm;
+  }
+
+  /* Разделитель группы в FieldTypeSelect */
+  .field-type-group-label {
+    @apply px-3 py-1 bg-gray-50 text-xs font-medium text-gray-400 uppercase tracking-wider;
+  }
+
+  /* Анимация скелетона */
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  /* Overlay для модальных окон */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center;
+  }
+
+  .modal-backdrop {
+    @apply absolute inset-0 bg-black/50 backdrop-blur-sm;
+  }
+
+  .modal-content {
+    @apply relative z-10 w-full mx-4 bg-white rounded-xl shadow-2xl;
+  }
+}
+
+/* ─── Утилиты ─────────────────────────────────────────────── */
+@layer utilities {
+
+  /* Плавное появление */
+  .animate-fade-in {
+    animation: fade-in 0.15s ease-out;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.2s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.2s ease-out;
+  }
+
+  /* Обрезка текста в ячейке */
+  .cell-text {
+    @apply truncate text-sm text-gray-800;
+  }
+
+  /* Прокрутка только по X (для Grid) */
+  .scroll-x-only {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  /* Sticky колонка-индекс */
+  .col-sticky {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: inherit;
+  }
+
+  /* Подсветка активной ячейки */
+  .cell-active {
+    @apply ring-2 ring-inset ring-blue-500;
+  }
+
+  /* Подсветка выбранной строки */
+  .row-selected {
+    @apply bg-blue-50;
+  }
+
+  /* Тонкая граница */
+  .border-light {
+    border-color: var(--color-border);
+  }
+}
+
+/* ─── Keyframes ───────────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Специфика Grid ──────────────────────────────────────── */
+
+/* Контейнер виртуализированной сетки */
+.grid-container {
+  position: relative;
+  will-change: transform;
+}
+
+/* Запрещаем перенос в заголовке */
+.grid-header {
+  white-space: nowrap;
+}
+
+/* Отключаем pointer-events при drag-resize колонки */
+.grid-resizing * {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Ручка resize колонки */
+.col-resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.col-resize-handle:hover,
+.col-resize-handle:active {
+  background: var(--color-primary);
+}
+
+/* ─── Специфика форм ──────────────────────────────────────── */
+
+.form-input {
+  @apply w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+         outline-none transition-shadow
+         focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-error {
+  @apply text-sm text-red-600 mt-1;
+}
+
+.form-hint {
+  @apply text-xs text-gray-400 mt-1;
+}
+
+/* ─── Специфика Dropdown ──────────────────────────────────── */
+
+.dropdown-menu {
+  @apply absolute z-50 min-w-40 bg-white border border-gray-200
+         rounded-xl shadow-lg py-1 animate-slide-down;
+}
+
+.dropdown-item {
+  @apply flex items-center gap-2 px-3 py-2 text-sm text-gray-700
+         cursor-pointer transition-colors hover:bg-gray-50;
+}
+
+.dropdown-item.danger {
+  @apply text-red-600 hover:bg-red-50;
+}
+
+.dropdown-separator {
+  @apply my-1 border-t border-gray-100;
+}
+
+/* ─── Специфика Toast / уведомлений ──────────────────────── */
+
+.toast {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg
+         text-sm font-medium animate-slide-up;
+}
+
+.toast-success {
+  @apply bg-green-50 text-green-800 border border-green-200;
+}
+
+.toast-error {
+  @apply bg-red-50 text-red-800 border border-red-200;
+}
+
+.toast-info {
+  @apply bg-blue-50 text-blue-800 border border-blue-200;
+}
+
+/* ─── Адаптивность ────────────────────────────────────────── */
+
+/* На мобильных — скрываем лишние колонки Grid */
+@media (max-width: 640px) {
+  .grid-header-cell,
+  .grid-cell {
+    min-width: 120px;
+  }
+
+  .modal-content {
+    @apply mx-2 rounded-lg;
+  }
+}
+
+/* ─── Печать ──────────────────────────────────────────────── */
+
+@media print {
+  .modal-overlay,
+  .dropdown-menu,
+  button {
+    display: none !important;
+  }
+
+  .grid-container {
+    overflow: visible !important;
+  }
+}

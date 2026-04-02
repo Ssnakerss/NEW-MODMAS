@@ -1,0 +1,60 @@
+.PHONY: run build test migrate-up migrate-down docker-up docker-down
+
+# ─── Запуск ───────────────────────────────────────────────────────────────────
+
+run:
+	go run ./cmd/server/main.go
+
+run-env:
+	env \$(cat .env | xargs) go run ./cmd/server/main.go
+
+build:
+	go build -o bin/datagrid ./cmd/server/main.go
+
+build-run: build
+	./bin/datagrid
+
+# ─── Зависимости ─────────────────────────────────────────────────────────────
+
+deps:
+	go mod tidy
+	go mod download
+
+# ─── Миграции ─────────────────────────────────────────────────────────────────
+
+migrate-up:
+	migrate -path migrations -database "postgres://\$(DB_USER):\$(DB_PASSWORD)@\$(DB_HOST):\$(DB_PORT)/\$(DB_NAME)?sslmode=\$(DB_SSLMODE)" up
+
+migrate-down:
+	migrate -path migrations -database "postgres://\$(DB_USER):\$(DB_PASSWORD)@\$(DB_HOST):\$(DB_PORT)/\$(DB_NAME)?sslmode=\$(DB_SSLMODE)" down
+
+migrate-drop:
+	migrate -path migrations -database "postgres://\$(DB_USER):\$(DB_PASSWORD)@\$(DB_HOST):\$(DB_PORT)/\$(DB_NAME)?sslmode=\$(DB_SSLMODE)" drop -f
+
+# ─── Docker ───────────────────────────────────────────────────────────────────
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+docker-rebuild:
+	docker compose up -d --build
+
+docker-logs:
+	docker compose logs -f app
+
+# ─── Тесты ───────────────────────────────────────────────────────────────────
+
+test:
+	go test ./... -v
+
+test-cover:
+	go test ./... -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+
+# ─── Линтер ──────────────────────────────────────────────────────────────────
+
+lint:
+	golangci-lint run ./...
