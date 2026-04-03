@@ -2,6 +2,7 @@ package permission
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/Ssnakerss/modmas/internal/middleware"
@@ -11,10 +12,11 @@ import (
 
 type Handler struct {
 	service *Service
+	logger  *slog.Logger
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, logger *slog.Logger) *Handler {
+	return &Handler{service: service, logger: logger}
 }
 
 // ─── Spreadsheet Access ───────────────────────────────────────────────────────
@@ -26,9 +28,11 @@ func (h *Handler) GetSpreadsheetAccess(w http.ResponseWriter, r *http.Request) {
 	accesses, err := h.service.GetSpreadsheetAccess(r.Context(), userID, spreadsheetID)
 	if err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.GetSpreadsheetAccess", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to get spreadsheet access", "error", err, "handler", "permission.GetSpreadsheetAccess", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -42,15 +46,18 @@ func (h *Handler) UpsertSpreadsheetAccess(w http.ResponseWriter, r *http.Request
 
 	var input UpsertSpreadsheetAccessInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "permission.UpsertSpreadsheetAccess")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
 
 	if err := h.service.UpsertSpreadsheetAccess(r.Context(), userID, spreadsheetID, input); err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.UpsertSpreadsheetAccess", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to upsert spreadsheet access", "error", err, "handler", "permission.UpsertSpreadsheetAccess", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.BadRequest(w, err.Error())
 		return
 	}
@@ -65,9 +72,11 @@ func (h *Handler) RemoveSpreadsheetAccess(w http.ResponseWriter, r *http.Request
 
 	if err := h.service.RemoveSpreadsheetAccess(r.Context(), userID, spreadsheetID, principalID); err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.RemoveSpreadsheetAccess", "userId", userID, "spreadsheetId", spreadsheetID, "principalId", principalID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to remove spreadsheet access", "error", err, "handler", "permission.RemoveSpreadsheetAccess", "userId", userID, "spreadsheetId", spreadsheetID, "principalId", principalID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -84,9 +93,11 @@ func (h *Handler) GetFieldAccess(w http.ResponseWriter, r *http.Request) {
 	accesses, err := h.service.GetFieldAccess(r.Context(), userID, spreadsheetID)
 	if err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.GetFieldAccess", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to get field access", "error", err, "handler", "permission.GetFieldAccess", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -101,6 +112,7 @@ func (h *Handler) UpsertFieldAccess(w http.ResponseWriter, r *http.Request) {
 
 	var input UpsertFieldAccessInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "permission.UpsertFieldAccess")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
@@ -108,9 +120,11 @@ func (h *Handler) UpsertFieldAccess(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.service.UpsertFieldAccess(r.Context(), userID, spreadsheetID, input); err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.UpsertFieldAccess", "userId", userID, "spreadsheetId", spreadsheetID, "fieldId", fieldID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to upsert field access", "error", err, "handler", "permission.UpsertFieldAccess", "userId", userID, "spreadsheetId", spreadsheetID, "fieldId", fieldID)
 		response.BadRequest(w, err.Error())
 		return
 	}
@@ -127,9 +141,11 @@ func (h *Handler) GetRowRules(w http.ResponseWriter, r *http.Request) {
 	rules, err := h.service.GetRowRules(r.Context(), userID, spreadsheetID)
 	if err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.GetRowRules", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to get row rules", "error", err, "handler", "permission.GetRowRules", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -143,6 +159,7 @@ func (h *Handler) UpsertRowRule(w http.ResponseWriter, r *http.Request) {
 
 	var input UpsertRowRuleInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "permission.UpsertRowRule")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
@@ -150,9 +167,11 @@ func (h *Handler) UpsertRowRule(w http.ResponseWriter, r *http.Request) {
 	rule, err := h.service.UpsertRowRule(r.Context(), userID, spreadsheetID, input)
 	if err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.UpsertRowRule", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to upsert row rule", "error", err, "handler", "permission.UpsertRowRule", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.BadRequest(w, err.Error())
 		return
 	}
@@ -167,9 +186,11 @@ func (h *Handler) DeleteRowRule(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.service.DeleteRowRule(r.Context(), userID, spreadsheetID, ruleID); err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.DeleteRowRule", "userId", userID, "spreadsheetId", spreadsheetID, "ruleId", ruleID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to delete row rule", "error", err, "handler", "permission.DeleteRowRule", "userId", userID, "spreadsheetId", spreadsheetID, "ruleId", ruleID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -186,9 +207,11 @@ func (h *Handler) GetMyPermissions(w http.ResponseWriter, r *http.Request) {
 	perms, err := h.service.GetMyPermissions(r.Context(), userID, spreadsheetID)
 	if err != nil {
 		if IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "permission.GetMyPermissions", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to get my permissions", "error", err, "handler", "permission.GetMyPermissions", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.InternalError(w, err.Error())
 		return
 	}

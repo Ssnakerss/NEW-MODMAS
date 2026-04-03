@@ -9,6 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.5.5
 	golang.org/x/crypto v0.22.0
+	golang.org/x/exp/slog v0.0.0-20230615192751-db256e944c57
 )
 
 require (

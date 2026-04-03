@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Env    string
 	Server ServerConfig
 	DB     DBConfig
 	JWT    JWTConfig
@@ -40,6 +41,7 @@ func (d DBConfig) DSN() string {
 
 func Load() *Config {
 	return &Config{
+		Env: getEnv("ENV", "local"),
 		Server: ServerConfig{
 			Host: getEnv("SERVER_HOST", "0.0.0.0"),
 			Port: getEnv("SERVER_PORT", "8080"),

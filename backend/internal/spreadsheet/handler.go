@@ -5,18 +5,22 @@ import (
 	"fmt"
 	"net/http"
 
+	"log/slog"
+
 	"github.com/Ssnakerss/modmas/internal/middleware"
 	"github.com/Ssnakerss/modmas/internal/types"
 	"github.com/Ssnakerss/modmas/pkg/response"
+
 	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
 	service *Service
+	logger  *slog.Logger
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, logger *slog.Logger) *Handler {
+	return &Handler{service: service, logger: logger}
 }
 
 // ─── Create ───────────────────────────────────────────────────────────────────
@@ -26,31 +30,37 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var input types.CreateSpreadsheetInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "spreadsheet.Create")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
 
 	if input.Name == "" {
+		h.logger.Error("validation failed", "error", "name is required", "handler", "spreadsheet.Create")
 		response.BadRequest(w, "name is required")
 		return
 	}
 
 	if input.WorkspaceID == "" {
+		h.logger.Error("validation failed", "error", "workspace_id is required", "handler", "spreadsheet.Create")
 		response.BadRequest(w, "workspace_id is required")
 		return
 	}
 
 	for i, f := range input.Fields {
 		if f.Name == "" {
+			h.logger.Error("validation failed", "error", fmt.Sprintf("field[%d]: name is required", i), "handler", "spreadsheet.Create")
 			response.BadRequest(w, fmt.Sprintf("field[%d]: name is required", i))
 			return
 		}
 		if !isValidFieldType(f.FieldType) {
+			h.logger.Error("validation failed", "error", fmt.Sprintf("field[%d]: invalid field type '%s'", i, f.FieldType), "handler", "spreadsheet.Create")
 			response.BadRequest(w, fmt.Sprintf("field[%d]: invalid field type '%s'", i, f.FieldType))
 			return
 		}
 		if f.Options != nil {
 			if err := validateFieldOptions(f.FieldType, f.Options); err != nil {
+				h.logger.Error("validation failed", "error", err, "handler", "spreadsheet.Create")
 				response.BadRequest(w, fmt.Sprintf("field[%d]: %s", i, err.Error()))
 				return
 			}
@@ -59,11 +69,13 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.service.Create(r.Context(), input, userID)
 	if err != nil {
+		h.logger.Error("failed to create spreadsheet", "error", err, "handler", "spreadsheet.Create")
 		response.InternalError(w, err.Error())
 		return
 	}
 
 	response.Created(w, result)
+
 }
 
 // ─── Get ──────────────────────────────────────────────────────────────────────
@@ -73,6 +85,7 @@ func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.service.GetWithFields(r.Context(), id)
 	if err != nil {
+		h.logger.Error("failed to get spreadsheet", "error", err, "handler", "spreadsheet.Get", "id", id)
 		response.NotFound(w, "spreadsheet not found")
 		return
 	}
@@ -87,6 +100,7 @@ func (h *Handler) ListByWorkspace(w http.ResponseWriter, r *http.Request) {
 
 	result, err := h.service.ListByWorkspace(r.Context(), workspaceID)
 	if err != nil {
+		h.logger.Error("failed to list spreadsheets by workspace", "error", err, "handler", "spreadsheet.ListByWorkspace", "workspaceId", workspaceID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -104,17 +118,20 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		Description string `json:"description"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "spreadsheet.Update")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
 
 	if input.Name == "" {
+		h.logger.Error("validation failed", "error", "name is required", "handler", "spreadsheet.Update")
 		response.BadRequest(w, "name is required")
 		return
 	}
 
 	result, err := h.service.Update(r.Context(), id, input.Name, input.Description)
 	if err != nil {
+		h.logger.Error("failed to update spreadsheet", "error", err, "handler", "spreadsheet.Update", "id", id)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -128,6 +145,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	if err := h.service.Delete(r.Context(), id); err != nil {
+		h.logger.Error("failed to delete spreadsheet", "error", err, "handler", "spreadsheet.Delete", "id", id)
 		response.InternalError(w, err.Error())
 		return
 	}

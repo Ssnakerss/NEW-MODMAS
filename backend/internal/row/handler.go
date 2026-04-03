@@ -2,6 +2,7 @@ package row
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 
 	"github.com/Ssnakerss/modmas/internal/middleware"
@@ -12,10 +13,11 @@ import (
 
 type Handler struct {
 	service *Service
+	logger  *slog.Logger
 }
 
-func NewHandler(service *Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *Service, logger *slog.Logger) *Handler {
+	return &Handler{service: service, logger: logger}
 }
 
 type queryRequest struct {
@@ -31,6 +33,7 @@ func (h *Handler) Query(w http.ResponseWriter, r *http.Request) {
 
 	var req queryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.logger.Warn("failed to decode request body, using defaults", "error", err, "handler", "row.Query")
 		req = queryRequest{Limit: 50}
 	}
 
@@ -42,9 +45,11 @@ func (h *Handler) Query(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if permissionPkg.IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "row.Query", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to query rows", "error", err, "handler", "row.Query", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -58,15 +63,18 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var data RowData
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		h.logger.Warn("failed to decode request body, using empty data", "error", err, "handler", "row.Create")
 		data = RowData{}
 	}
 
 	row, err := h.service.Create(r.Context(), userID, spreadsheetID, data)
 	if err != nil {
 		if permissionPkg.IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "row.Create", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to create row", "error", err, "handler", "row.Create", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.BadRequest(w, err.Error())
 		return
 	}
@@ -81,6 +89,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var data RowData
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "row.Update")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
@@ -88,9 +97,11 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	row, err := h.service.Update(r.Context(), userID, spreadsheetID, rowID, data)
 	if err != nil {
 		if permissionPkg.IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "row.Update", "userId", userID, "spreadsheetId", spreadsheetID, "rowId", rowID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to update row", "error", err, "handler", "row.Update", "userId", userID, "spreadsheetId", spreadsheetID, "rowId", rowID)
 		response.BadRequest(w, err.Error())
 		return
 	}
@@ -105,9 +116,11 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.service.Delete(r.Context(), userID, spreadsheetID, rowID); err != nil {
 		if permissionPkg.IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "row.Delete", "userId", userID, "spreadsheetId", spreadsheetID, "rowId", rowID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to delete row", "error", err, "handler", "row.Delete", "userId", userID, "spreadsheetId", spreadsheetID, "rowId", rowID)
 		response.InternalError(w, err.Error())
 		return
 	}
@@ -121,15 +134,18 @@ func (h *Handler) BulkDelete(w http.ResponseWriter, r *http.Request) {
 
 	var input BulkDeleteInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		h.logger.Error("failed to decode request body", "error", err, "handler", "row.BulkDelete")
 		response.BadRequest(w, "invalid request body")
 		return
 	}
 
 	if err := h.service.BulkDelete(r.Context(), userID, spreadsheetID, input); err != nil {
 		if permissionPkg.IsForbidden(err) {
+			h.logger.Error("permission denied", "error", err, "handler", "row.BulkDelete", "userId", userID, "spreadsheetId", spreadsheetID)
 			response.Forbidden(w, err.Error())
 			return
 		}
+		h.logger.Error("failed to bulk delete rows", "error", err, "handler", "row.BulkDelete", "userId", userID, "spreadsheetId", spreadsheetID)
 		response.BadRequest(w, err.Error())
 		return
 	}

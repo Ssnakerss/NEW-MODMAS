@@ -10,13 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
-
 	"github.com/Ssnakerss/modmas/config"
 	authPkg "github.com/Ssnakerss/modmas/internal/auth"
 	"github.com/Ssnakerss/modmas/internal/ddl"
 	fieldPkg "github.com/Ssnakerss/modmas/internal/field"
+	"github.com/Ssnakerss/modmas/internal/logger"
 	"github.com/Ssnakerss/modmas/internal/middleware"
 	permissionPkg "github.com/Ssnakerss/modmas/internal/permission"
 	rowPkg "github.com/Ssnakerss/modmas/internal/row"
@@ -24,21 +22,27 @@ import (
 	workspacePkg "github.com/Ssnakerss/modmas/internal/workspace"
 	"github.com/Ssnakerss/modmas/pkg/jwt"
 	"github.com/Ssnakerss/modmas/pkg/postgres"
+	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
+
 	cfg := config.Load()
+	l := logger.Setup(cfg.Env, os.Stdout)
+	l.Log.Info("server startin config")
+	l.Log.Info(fmt.Sprintf("env: %v", cfg))
 
 	// ─── База данных ──────────────────────────────────────────────────────────
 	ctx := context.Background()
 
 	pool, err := postgres.NewPool(ctx, cfg.DB.DSN())
 	if err != nil {
-		log.Fatalf("connect to db: %v", err)
+		log.Fatalf("Database connection error: %v", err)
 	}
 	defer pool.Close()
 
-	log.Println("connected to database")
+	l.Log.Info("connected to database")
 
 	// ─── Инфраструктура ───────────────────────────────────────────────────────
 	jwtManager := jwt.NewManager(cfg.JWT.Secret, cfg.JWT.AccessTokenTTL)
@@ -94,12 +98,12 @@ func main() {
 	)
 
 	// ─── Handlers ─────────────────────────────────────────────────────────────
-	authHandler := authPkg.NewHandler(authService)
-	wsHandler := workspacePkg.NewHandler(wsService)
-	spreadsheetHandler := spreadsheetPkg.NewHandler(spreadsheetSvc)
-	fieldHandler := fieldPkg.NewHandler(fieldService)
-	rowHandler := rowPkg.NewHandler(rowService)
-	permHandler := permissionPkg.NewHandler(permService)
+	authHandler := authPkg.NewHandler(authService, l.Log)
+	wsHandler := workspacePkg.NewHandler(wsService, l.Log)
+	spreadsheetHandler := spreadsheetPkg.NewHandler(spreadsheetSvc, l.Log)
+	fieldHandler := fieldPkg.NewHandler(fieldService, l.Log)
+	rowHandler := rowPkg.NewHandler(rowService, l.Log)
+	permHandler := permissionPkg.NewHandler(permService, l.Log)
 
 	// ─── Router ───────────────────────────────────────────────────────────────
 	r := chi.NewRouter()
@@ -180,14 +184,14 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		log.Printf("server started on %s", addr)
+		l.Log.Info("server started", "addr", addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %v", err)
 		}
 	}()
 
 	<-quit
-	log.Println("shutting down server...")
+	l.Log.Info("shutting down server...")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -196,5 +200,5 @@ func main() {
 		log.Fatalf("server forced to shutdown: %v", err)
 	}
 
-	log.Println("server stopped")
+	l.Log.Info("server stopped")
 }

@@ -72,7 +72,7 @@ func (e *Enforcer) GetSpreadsheetPerms(ctx context.Context, userID, spreadsheetI
 func (e *Enforcer) RequireView(ctx context.Context, userID, spreadsheetID string) error {
 	perms, err := e.GetSpreadsheetPerms(ctx, userID, spreadsheetID)
 	if err != nil {
-		return err
+		return fmt.Errorf("check spreadsheet permissions: %w", err)
 	}
 	if !perms.CanView {
 		return ErrForbidden("view", "spreadsheet", spreadsheetID)
@@ -84,7 +84,7 @@ func (e *Enforcer) RequireView(ctx context.Context, userID, spreadsheetID string
 func (e *Enforcer) RequireInsert(ctx context.Context, userID, spreadsheetID string) error {
 	perms, err := e.GetSpreadsheetPerms(ctx, userID, spreadsheetID)
 	if err != nil {
-		return err
+		return fmt.Errorf("check spreadsheet permissions: %w", err)
 	}
 	if !perms.CanInsert {
 		return ErrForbidden("insert", "spreadsheet", spreadsheetID)
@@ -96,7 +96,7 @@ func (e *Enforcer) RequireInsert(ctx context.Context, userID, spreadsheetID stri
 func (e *Enforcer) RequireEdit(ctx context.Context, userID, spreadsheetID string) error {
 	perms, err := e.GetSpreadsheetPerms(ctx, userID, spreadsheetID)
 	if err != nil {
-		return err
+		return fmt.Errorf("check spreadsheet permissions: %w", err)
 	}
 	if !perms.CanEdit {
 		return ErrForbidden("edit", "spreadsheet", spreadsheetID)
@@ -108,7 +108,7 @@ func (e *Enforcer) RequireEdit(ctx context.Context, userID, spreadsheetID string
 func (e *Enforcer) RequireDelete(ctx context.Context, userID, spreadsheetID string) error {
 	perms, err := e.GetSpreadsheetPerms(ctx, userID, spreadsheetID)
 	if err != nil {
-		return err
+		return fmt.Errorf("check spreadsheet permissions: %w", err)
 	}
 	if !perms.CanDelete {
 		return ErrForbidden("delete", "spreadsheet", spreadsheetID)
@@ -120,7 +120,7 @@ func (e *Enforcer) RequireDelete(ctx context.Context, userID, spreadsheetID stri
 func (e *Enforcer) RequireManage(ctx context.Context, userID, spreadsheetID string) error {
 	perms, err := e.GetSpreadsheetPerms(ctx, userID, spreadsheetID)
 	if err != nil {
-		return err
+		return fmt.Errorf("check spreadsheet permissions: %w", err)
 	}
 	if !perms.CanManage {
 		return ErrForbidden("manage", "spreadsheet", spreadsheetID)
