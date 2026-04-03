@@ -40,7 +40,7 @@ export const FieldTypeSelect: React.FC<Props> = ({ value, onChange }) => {
                 type="button"
                 onClick={() => onChange(type.value)}
                 className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-left transition-colors
-                  \${value === type.value
+                  ${value === type.value
                     ? 'bg-blue-50 text-blue-700 font-medium'
                     : 'text-gray-700 hover:bg-gray-50'
                   }`}

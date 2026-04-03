@@ -80,7 +80,7 @@ export const ShareModal: React.FC<Props> = ({ spreadsheetId, fields, onClose }) 
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`px-4 py-2 text-sm font-medium rounded-t transition-colors
-              \${tab === t.id ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}
+              ${tab === t.id ? 'border-b-2 border-blue-600 text-blue-700' : 'text-gray-600 hover:text-gray-900'}`}
           >
             {t.label}
           </button>

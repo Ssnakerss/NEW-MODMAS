@@ -28,7 +28,7 @@ export const WorkspacesPage: React.FC = () => {
       qc.invalidateQueries({ queryKey: ['spreadsheets'] });
       setCreateOpen(false);
       setNewName('');
-      navigate(`/spreadsheet/\${s.id}`);
+      navigate(`/spreadsheet/${s.id}`);
     },
   });
 
@@ -67,7 +67,7 @@ export const WorkspacesPage: React.FC = () => {
             {spreadsheets.map((s) => (
               <button
                 key={s.id}
-                onClick={() => navigate(`/spreadsheet/\${s.id}`)}
+                onClick={() => navigate(`/spreadsheet/${s.id}`)}
                 className="text-left p-5 bg-white rounded-xl border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all group"
               >
                 <div className="text-2xl mb-3">📊</div>

@@ -74,7 +74,7 @@ export const Cell: React.FC<Props> = React.memo(({ row, field, canEdit, onUpdate
     }
     if (field.field_type === 'boolean') {
       return (
-        <span className={`text-lg \${rawValue ? 'text-green-500' : 'text-gray-300'}`}>
+        <span className={`text-lg ${rawValue ? 'text-green-500' : 'text-gray-300'}`}>
           {rawValue ? '✓' : '✗'}
         </span>
       );

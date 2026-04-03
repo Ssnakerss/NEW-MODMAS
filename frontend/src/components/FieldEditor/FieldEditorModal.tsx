@@ -40,7 +40,7 @@ export const FieldEditorModal: React.FC<Props> = ({ field, spreadsheetId, onClos
     if (isEdit && field) {
       const compatible = TYPE_CHANGE_COMPATIBILITY[field.field_type] ?? [];
       if (!compatible.includes(newType)) {
-        setTypeWarning(`Смена типа с «\${field.field_type}» на «\${newType}» может привести к потере данных!`);
+        setTypeWarning(`Смена типа с «${field.field_type}» на «${newType}» может привести к потере данных!`);
       } else {
         setTypeWarning('');
       }
@@ -72,7 +72,7 @@ export const FieldEditorModal: React.FC<Props> = ({ field, spreadsheetId, onClos
     <Modal
       open
       onClose={onClose}
-      title={isEdit ? `Редактировать поле «\${field?.name}»` : 'Новое поле'}
+      title={isEdit ? `Редактировать поле «${field?.name}»` : 'Новое поле'}
     >
       <div className="space-y-4">
         {/* Name */}

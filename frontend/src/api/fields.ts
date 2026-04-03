@@ -16,14 +16,14 @@ export interface UpdateFieldPayload extends Partial<CreateFieldPayload> {
 
 export const fieldsApi = {
   create: (spreadsheetId: string, data: CreateFieldPayload) =>
-    apiClient.post<Field>(`/spreadsheets/\${spreadsheetId}/fields`, data).then(r => r.data),
+    apiClient.post<Field>(`/spreadsheets/${spreadsheetId}/fields`, data).then(r => r.data),
 
   update: (fieldId: string, data: UpdateFieldPayload) =>
-    apiClient.put<Field>(`/fields/\${fieldId}`, data).then(r => r.data),
+    apiClient.put<Field>(`/fields/${fieldId}`, data).then(r => r.data),
 
   delete: (fieldId: string) =>
-    apiClient.delete(`/fields/\${fieldId}`),
+    apiClient.delete(`/fields/${fieldId}`),
 
   reorder: (spreadsheetId: string, fieldIds: string[]) =>
-    apiClient.patch(`/spreadsheets/\${spreadsheetId}/fields/reorder`, { field_ids: fieldIds }),
+    apiClient.patch(`/spreadsheets/${spreadsheetId}/fields/reorder`, { field_ids: fieldIds }),
 };

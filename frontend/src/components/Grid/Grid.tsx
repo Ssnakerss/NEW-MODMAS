@@ -121,7 +121,7 @@ export const Grid: React.FC<Props> = ({
               <div
                 key={row._id}
                 style={{ position: 'absolute', top: vItem.start, height: ROW_HEIGHT, width: '100%' }}
-                className={`flex border-b border-gray-100 group \${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                className={`flex border-b border-gray-100 group ${isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
               >
                 {/* Index + checkbox */}
                 <div
