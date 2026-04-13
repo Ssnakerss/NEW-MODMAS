@@ -5,19 +5,21 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Ssnakerss/modmas/internal/workspace"
 	"github.com/Ssnakerss/modmas/pkg/hasher"
 	"github.com/Ssnakerss/modmas/pkg/jwt"
 )
 
 type Service struct {
-	repo       *Repository
-	jwtManager *jwt.Manager
+	repo         *Repository
+	jwtManager   *jwt.Manager
+	workspaceSvc *workspace.Service
 }
 
 // NewService создает новый экземпляр сервиса аутентификации
-// Принимает репозиторий для работы с пользователями и менеджер JWT-токенов
-func NewService(repo *Repository, jwtManager *jwt.Manager) *Service {
-	return &Service{repo: repo, jwtManager: jwtManager}
+// Принимает репозиторий для работы с пользователями, менеджер JWT-токенов и сервис рабочих пространств
+func NewService(repo *Repository, jwtManager *jwt.Manager, workspaceSvc *workspace.Service) *Service {
+	return &Service{repo: repo, jwtManager: jwtManager, workspaceSvc: workspaceSvc}
 }
 
 type RegisterInput struct {
@@ -55,6 +57,12 @@ func (s *Service) Register(ctx context.Context, input RegisterInput) (*AuthRespo
 	user, err := s.repo.Create(ctx, input.Email, hash, input.Name)
 	if err != nil {
 		return nil, fmt.Errorf("create user: %w", err)
+	}
+
+	// Создаем рабочее пространство для нового пользователя
+	workspaceName := fmt.Sprintf("%s Workspace", input.Name)
+	if _, err := s.workspaceSvc.Create(ctx, workspaceName, user.ID); err != nil {
+		return nil, fmt.Errorf("create workspace: %w", err)
 	}
 
 	token, err := s.jwtManager.Generate(user.ID, user.Email)

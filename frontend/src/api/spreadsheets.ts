@@ -1,5 +1,9 @@
 import { apiClient } from './client';
-import type { Spreadsheet } from '../types';
+import type { Spreadsheet, Field } from '../types';
+
+export interface SpreadsheetWithFields extends Omit<Spreadsheet, 'fields'> {
+  fields: Field[];
+}
 
 interface CreateSpreadsheetPayload {
   name: string;
@@ -9,16 +13,16 @@ interface CreateSpreadsheetPayload {
 
 export const spreadsheetsApi = {
   list: (workspaceId: string) =>
-    apiClient.get<Spreadsheet[]>(`/workspaces/${workspaceId}/spreadsheets`).then(r => r.data),
+    apiClient.get<SpreadsheetWithFields[]>(`/workspaces/${workspaceId}/spreadsheets`).then(r => r.data),
 
   get: (id: string) =>
-    apiClient.get<Spreadsheet>(`/spreadsheets/${id}`).then(r => r.data),
+    apiClient.get<SpreadsheetWithFields>(`/spreadsheets/${id}`).then(r => r.data),
 
   create: (data: CreateSpreadsheetPayload) =>
-    apiClient.post<Spreadsheet>('/spreadsheets', data).then(r => r.data),
+    apiClient.post<SpreadsheetWithFields>('/spreadsheets', data).then(r => r.data),
 
-  update: (id: string, data: Partial<Pick<Spreadsheet, 'name' | 'description'>>) =>
-    apiClient.put<Spreadsheet>(`/spreadsheets/${id}`, data).then(r => r.data),
+  update: (id: string, data: Partial<Pick<SpreadsheetWithFields, 'name' | 'description'>>) =>
+    apiClient.put<SpreadsheetWithFields>(`/spreadsheets/${id}`, data).then(r => r.data),
 
   delete: (id: string) =>
     apiClient.delete(`/spreadsheets/${id}`),

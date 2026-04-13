@@ -9,7 +9,8 @@ import { Grid } from '../components/Grid/Grid';
 import { FieldEditorModal } from '../components/FieldEditor/FieldEditorModal';
 import { ShareModal } from '../components/Permissions/ShareModal';
 import { Button } from '../components/ui/Button';
-import type { Field } from '../types';
+import type { Field, Spreadsheet } from '../types';
+import type { SpreadsheetWithFields } from '../api/spreadsheets';
 
 export const SpreadsheetPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,13 +24,22 @@ export const SpreadsheetPage: React.FC = () => {
   const [addFieldOpen, setAddFieldOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const query = useQuery({
     queryKey: ['spreadsheet', id],
     queryFn: () => spreadsheetsApi.get(id!),
     enabled: Boolean(id),
   });
+  
+  const { data, isLoading } = query;
   useEffect(() => {
-    if (data) setSpreadsheet(data);
+    if (data) {
+      // Convert SpreadsheetWithFields to Spreadsheet for compatibility
+      const spreadsheet: Spreadsheet = {
+        ...data,
+        fields: data.fields
+      };
+      setSpreadsheet(spreadsheet);
+    }
   }, [data]);
 
   const { allRows, fetchNextPage, hasNextPage, isFetchingNextPage, createRow, updateRow, deleteRow } = useRows(id!);

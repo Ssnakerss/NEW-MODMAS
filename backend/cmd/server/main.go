@@ -78,7 +78,7 @@ func main() {
 	wsService := workspacePkg.NewService(wsRepo, ddlExec)
 
 	// auth.Service
-	authService := authPkg.NewService(authRepo, jwtManager)
+	authService := authPkg.NewService(authRepo, jwtManager, wsService)
 
 	// permission.Enforcer и permission.Service
 	enforcer := permissionPkg.NewEnforcer(pool, permRepo, fieldRepo)
