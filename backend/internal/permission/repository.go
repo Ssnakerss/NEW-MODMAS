@@ -5,30 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/Ssnakerss/modmas/internal/types"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-type SpreadsheetAccess struct {
-	ID            string `json:"id"`
-	SpreadsheetID string `json:"spreadsheet_id"`
-	PrincipalID   string `json:"principal_id"`
-	PrincipalType string `json:"principal_type"`
-	PrincipalName string `json:"principal_name,omitempty"`
-	CanView       bool   `json:"can_view"`
-	CanInsert     bool   `json:"can_insert"`
-	CanEdit       bool   `json:"can_edit"`
-	CanDelete     bool   `json:"can_delete"`
-	CanManage     bool   `json:"can_manage"`
-}
-
-type FieldAccess struct {
-	ID            string `json:"id"`
-	FieldID       string `json:"field_id"`
-	PrincipalID   string `json:"principal_id"`
-	PrincipalType string `json:"principal_type"`
-	CanView       bool   `json:"can_view"`
-	CanEdit       bool   `json:"can_edit"`
-}
 
 type Repository struct {
 	pool *pgxpool.Pool
@@ -38,7 +17,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{pool: pool}
 }
 
-func (r *Repository) GetSpreadsheetAccess(ctx context.Context, spreadsheetID string) ([]*SpreadsheetAccess, error) {
+func (r *Repository) GetSpreadsheetAccess(ctx context.Context, spreadsheetID string) ([]*types.SpreadsheetAccess, error) {
 	rows, err := r.pool.Query(ctx, `
         SELECT sa.id, sa.spreadsheet_id, sa.principal_id, sa.principal_type,
                COALESCE(u.name, sa.principal_type) as principal_name,
@@ -52,9 +31,9 @@ func (r *Repository) GetSpreadsheetAccess(ctx context.Context, spreadsheetID str
 	}
 	defer rows.Close()
 
-	var result []*SpreadsheetAccess
+	var result []*types.SpreadsheetAccess
 	for rows.Next() {
-		a := &SpreadsheetAccess{}
+		a := &types.SpreadsheetAccess{}
 		if err := rows.Scan(
 			&a.ID, &a.SpreadsheetID, &a.PrincipalID, &a.PrincipalType,
 			&a.PrincipalName, &a.CanView, &a.CanInsert, &a.CanEdit, &a.CanDelete, &a.CanManage,
@@ -66,7 +45,7 @@ func (r *Repository) GetSpreadsheetAccess(ctx context.Context, spreadsheetID str
 	return result, nil
 }
 
-func (r *Repository) UpsertSpreadsheetAccess(ctx context.Context, a *SpreadsheetAccess) error {
+func (r *Repository) UpsertSpreadsheetAccess(ctx context.Context, a *types.SpreadsheetAccess) error {
 	_, err := r.pool.Exec(ctx, `
         INSERT INTO meta.spreadsheet_access
             (spreadsheet_id, principal_id, principal_type, can_view, can_insert, can_edit, can_delete, can_manage)
@@ -89,8 +68,8 @@ func (r *Repository) RemoveSpreadsheetAccess(ctx context.Context, spreadsheetID,
 	return err
 }
 
-func (r *Repository) CheckAccess(ctx context.Context, spreadsheetID, userID string) (*SpreadsheetAccess, error) {
-	a := &SpreadsheetAccess{}
+func (r *Repository) CheckAccess(ctx context.Context, spreadsheetID, userID string) (*types.SpreadsheetAccess, error) {
+	a := &types.SpreadsheetAccess{}
 	err := r.pool.QueryRow(ctx, `
         SELECT can_view, can_insert, can_edit, can_delete, can_manage
         FROM meta.spreadsheet_access
@@ -104,7 +83,7 @@ func (r *Repository) CheckAccess(ctx context.Context, spreadsheetID, userID stri
 	return a, nil
 }
 
-func (r *Repository) GetFieldAccess(ctx context.Context, spreadsheetID string) ([]*FieldAccess, error) {
+func (r *Repository) GetFieldAccess(ctx context.Context, spreadsheetID string) ([]*types.FieldAccess, error) {
 	rows, err := r.pool.Query(ctx, `
         SELECT fa.id, fa.field_id, fa.principal_id, fa.principal_type, fa.can_view, fa.can_edit
         FROM meta.field_access fa
@@ -116,9 +95,9 @@ func (r *Repository) GetFieldAccess(ctx context.Context, spreadsheetID string) (
 	}
 	defer rows.Close()
 
-	var result []*FieldAccess
+	var result []*types.FieldAccess
 	for rows.Next() {
-		fa := &FieldAccess{}
+		fa := &types.FieldAccess{}
 		if err := rows.Scan(&fa.ID, &fa.FieldID, &fa.PrincipalID, &fa.PrincipalType, &fa.CanView, &fa.CanEdit); err != nil {
 			return nil, err
 		}
@@ -127,7 +106,7 @@ func (r *Repository) GetFieldAccess(ctx context.Context, spreadsheetID string) (
 	return result, nil
 }
 
-func (r *Repository) UpsertFieldAccess(ctx context.Context, fa *FieldAccess) error {
+func (r *Repository) UpsertFieldAccess(ctx context.Context, fa *types.FieldAccess) error {
 	_, err := r.pool.Exec(ctx, `
         INSERT INTO meta.field_access (field_id, principal_id, principal_type, can_view, can_edit)
         VALUES ($1,$2,$3,$4,$5)

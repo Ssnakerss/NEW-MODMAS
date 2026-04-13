@@ -61,8 +61,6 @@ type CreateSpreadsheetInput struct {
 	Fields      []CreateFieldInput `json:"fields"`
 }
 
-// Добавить в конец файла:
-
 // ─── Workspace ────────────────────────────────────────────────────────────────
 
 type Workspace struct {
@@ -72,4 +70,28 @@ type Workspace struct {
 	DBSchema  string    `json:"db_schema"`
 	CreatedAt time.Time `json:"created_at"`
 	Role      string    `json:"role,omitempty"`
+}
+
+// ─── Spreadsheet Access ──────────────────────────────────────────────────────
+
+type SpreadsheetAccess struct {
+	ID            string `json:"id,omitempty"`
+	SpreadsheetID string `json:"spreadsheet_id"`
+	PrincipalID   string `json:"principal_id"`
+	PrincipalType string `json:"principal_type"`
+	PrincipalName string `json:"principal_name,omitempty"`
+	CanView       bool   `json:"can_view"`
+	CanInsert     bool   `json:"can_insert"`
+	CanEdit       bool   `json:"can_edit"`
+	CanDelete     bool   `json:"can_delete"`
+	CanManage     bool   `json:"can_manage"`
+}
+
+type FieldAccess struct {
+	ID            string `json:"id,omitempty"`
+	FieldID       string `json:"field_id"`
+	PrincipalID   string `json:"principal_id"`
+	PrincipalType string `json:"principal_type"`
+	CanView       bool   `json:"can_view"`
+	CanEdit       bool   `json:"can_edit"`
 }

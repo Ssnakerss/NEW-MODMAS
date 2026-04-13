@@ -23,11 +23,17 @@ type WorkspaceGetter interface {
 	GetByID(ctx context.Context, id string) (*types.Workspace, error)
 }
 
+// PermissionRepository — интерфейс для управления правами доступа.
+type PermissionRepository interface {
+	UpsertSpreadsheetAccess(ctx context.Context, access *types.SpreadsheetAccess) error
+}
+
 type Service struct {
 	repo      *Repository
 	fieldRepo FieldRepository
 	wsGetter  WorkspaceGetter
 	ddlExec   *ddl.Executor
+	permRepo  PermissionRepository
 }
 
 func NewService(
@@ -35,12 +41,14 @@ func NewService(
 	fieldRepo FieldRepository,
 	wsGetter WorkspaceGetter,
 	ddlExec *ddl.Executor,
+	permRepo PermissionRepository,
 ) *Service {
 	return &Service{
 		repo:      repo,
 		fieldRepo: fieldRepo,
 		wsGetter:  wsGetter,
 		ddlExec:   ddlExec,
+		permRepo:  permRepo,
 	}
 }
 
@@ -113,6 +121,21 @@ func (s *Service) Create(ctx context.Context, input types.CreateSpreadsheetInput
 				return fmt.Errorf("create field '%s': %w", fr.Name, err)
 			}
 			createdFields = append(createdFields, cf)
+		}
+
+		// Добавляем права доступа для создателя таблицы
+		access := &types.SpreadsheetAccess{
+			SpreadsheetID: created.ID,
+			PrincipalID:   createdBy,
+			PrincipalType: "user",
+			CanView:       true,
+			CanInsert:     true,
+			CanEdit:       true,
+			CanDelete:     true,
+			CanManage:     true,
+		}
+		if err := s.permRepo.UpsertSpreadsheetAccess(ctx, access); err != nil {
+			return fmt.Errorf("grant creator access: %w", err)
 		}
 
 		result = &types.SpreadsheetWithFields{

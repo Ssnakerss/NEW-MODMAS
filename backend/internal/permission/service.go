@@ -4,28 +4,25 @@ import (
 	"context"
 	"fmt"
 
-	spreadsheetPkg "github.com/Ssnakerss/modmas/internal/spreadsheet"
+	"github.com/Ssnakerss/modmas/internal/types"
 	workspacePkg "github.com/Ssnakerss/modmas/internal/workspace"
 )
 
 type Service struct {
-	repo       *Repository
-	spreadRepo *spreadsheetPkg.Repository
-	wsRepo     *workspacePkg.Repository
-	enforcer   *Enforcer
+	repo     *Repository
+	wsRepo   *workspacePkg.Repository
+	enforcer *Enforcer
 }
 
 func NewService(
 	repo *Repository,
-	spreadRepo *spreadsheetPkg.Repository,
 	wsRepo *workspacePkg.Repository,
 	enforcer *Enforcer,
 ) *Service {
 	return &Service{
-		repo:       repo,
-		spreadRepo: spreadRepo,
-		wsRepo:     wsRepo,
-		enforcer:   enforcer,
+		repo:     repo,
+		wsRepo:   wsRepo,
+		enforcer: enforcer,
 	}
 }
 
@@ -47,7 +44,7 @@ type RemoveSpreadsheetAccessInput struct {
 
 // GetSpreadsheetAccess возвращает все права доступа к таблице.
 // Только пользователи с правом can_manage могут просматривать список прав.
-func (s *Service) GetSpreadsheetAccess(ctx context.Context, requesterID, spreadsheetID string) ([]*SpreadsheetAccess, error) {
+func (s *Service) GetSpreadsheetAccess(ctx context.Context, requesterID, spreadsheetID string) ([]*types.SpreadsheetAccess, error) {
 	if err := s.enforcer.RequireManage(ctx, requesterID, spreadsheetID); err != nil {
 		return nil, err
 	}
@@ -92,7 +89,7 @@ func (s *Service) UpsertSpreadsheetAccess(
 		return fmt.Errorf("cannot modify owner permissions")
 	}
 
-	access := &SpreadsheetAccess{
+	access := &types.SpreadsheetAccess{
 		SpreadsheetID: spreadsheetID,
 		PrincipalID:   input.PrincipalID,
 		PrincipalType: input.PrincipalType,
@@ -147,7 +144,7 @@ type UpsertFieldAccessInput struct {
 }
 
 // GetFieldAccess возвращает права доступа ко всем полям таблицы.
-func (s *Service) GetFieldAccess(ctx context.Context, requesterID, spreadsheetID string) ([]*FieldAccess, error) {
+func (s *Service) GetFieldAccess(ctx context.Context, requesterID, spreadsheetID string) ([]*types.FieldAccess, error) {
 	if err := s.enforcer.RequireManage(ctx, requesterID, spreadsheetID); err != nil {
 		return nil, err
 	}
@@ -186,7 +183,7 @@ func (s *Service) UpsertFieldAccess(
 		return fmt.Errorf("principal_type must be 'user' or 'workspace_role'")
 	}
 
-	fa := &FieldAccess{
+	fa := &types.FieldAccess{
 		FieldID:       input.FieldID,
 		PrincipalID:   input.PrincipalID,
 		PrincipalType: input.PrincipalType,
@@ -340,17 +337,7 @@ func (s *Service) GetMyPermissions(ctx context.Context, userID, spreadsheetID st
 
 // isWorkspaceOwner проверяет, является ли пользователь владельцем workspace таблицы
 func (s *Service) isWorkspaceOwner(ctx context.Context, userID, spreadsheetID string) (bool, error) {
-	spread, err := s.spreadRepo.GetByID(ctx, spreadsheetID)
-	if err != nil {
-		return false, fmt.Errorf("get spreadsheet: %w", err)
-	}
-
-	ws, err := s.wsRepo.GetByID(ctx, spread.WorkspaceID)
-	if err != nil {
-		return false, fmt.Errorf("get workspace: %w", err)
-	}
-
-	return ws.OwnerID == userID, nil
+	return s.enforcer.isWorkspaceOwner(ctx, userID, spreadsheetID)
 }
 
 // validateRowCondition проверяет корректность JSON-условия row-level правила

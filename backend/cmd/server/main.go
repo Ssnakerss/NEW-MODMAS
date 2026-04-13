@@ -65,12 +65,13 @@ func main() {
 		ddlExec,
 	)
 
-	// spreadsheet.Service использует интерфейсы FieldRepository и WorkspaceGetter
+	// spreadsheet.Service использует интерфейсы FieldRepository, WorkspaceGetter и PermissionRepository
 	spreadsheetSvc := spreadsheetPkg.NewService(
 		spreadsheetRepo,
 		fieldRepo, // реализует spreadsheet.FieldRepository
 		wsRepo,    // реализует spreadsheet.WorkspaceGetter
 		ddlExec,
+		permRepo, // реализует spreadsheet.PermissionRepository
 	)
 
 	// workspace.Service
@@ -84,7 +85,6 @@ func main() {
 
 	permService := permissionPkg.NewService(
 		permRepo,
-		spreadsheetRepo,
 		wsRepo,
 		enforcer,
 	)
