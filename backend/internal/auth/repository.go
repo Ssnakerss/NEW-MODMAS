@@ -19,10 +19,15 @@ type Repository struct {
 	pool *pgxpool.Pool
 }
 
+// NewRepository создает новый экземпляр репозитория для работы с пользователями
+// Принимает пул соединений с базой данных
 func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{pool: pool}
 }
 
+// Create создает нового пользователя в базе данных
+// Вставляет запись в таблицу auth.users и возвращает созданный объект User
+// Возвращает ошибку, если операция не удалась
 func (r *Repository) Create(ctx context.Context, email, passwordHash, name string) (*User, error) {
 	user := &User{}
 	err := r.pool.QueryRow(ctx, `
@@ -38,6 +43,8 @@ func (r *Repository) Create(ctx context.Context, email, passwordHash, name strin
 	return user, nil
 }
 
+// GetByEmail ищет пользователя по email в базе данных
+// Возвращает объект User, если пользователь найден, или ошибку
 func (r *Repository) GetByEmail(ctx context.Context, email string) (*User, error) {
 	user := &User{}
 	err := r.pool.QueryRow(ctx, `
@@ -53,6 +60,8 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) (*User, error
 	return user, nil
 }
 
+// GetByID ищет пользователя по его уникальному идентификатору
+// Возвращает объект User, если пользователь найден, или ошибку
 func (r *Repository) GetByID(ctx context.Context, id string) (*User, error) {
 	user := &User{}
 	err := r.pool.QueryRow(ctx, `

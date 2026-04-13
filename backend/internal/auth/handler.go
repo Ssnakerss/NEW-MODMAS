@@ -14,10 +14,15 @@ type Handler struct {
 	logger  *slog.Logger
 }
 
+// NewHandler создает новый экземпляр Handler для обработки HTTP-запросов аутентификации
+// Принимает сервис аутентификации и логгер для записи сообщений
 func NewHandler(service *Service, logger *slog.Logger) *Handler {
 	return &Handler{service: service, logger: logger}
 }
 
+// Register обрабатывает HTTP-запрос на регистрацию нового пользователя
+// Декодирует входные данные из тела запроса, валидирует их и передает в сервис
+// Возвращает 201 Created с данными пользователя и токеном, или 400 Bad Request в случае ошибки
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var input RegisterInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -36,6 +41,9 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	response.Created(w, res)
 }
 
+// Login обрабатывает HTTP-запрос на аутентификацию пользователя
+// Проверяет логин и пароль, генерирует JWT-токен при успешной аутентификации
+// Возвращает 200 OK с данными пользователя и токеном, или 401 Unauthorized в случае ошибки
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var input LoginInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -54,6 +62,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	response.OK(w, res)
 }
 
+// Me обрабатывает HTTP-запрос на получение данных текущего пользователя
+// Извлекает ID пользователя из JWT-токена и возвращает информацию о пользователе
+// Возвращает 200 OK с данными пользователя, или 404 Not Found если пользователь не найден
 func (h *Handler) Me(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 	user, err := h.service.Me(r.Context(), userID)

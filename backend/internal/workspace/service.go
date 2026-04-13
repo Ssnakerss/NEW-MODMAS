@@ -15,10 +15,15 @@ type Service struct {
 	ddlExec *ddl.Executor
 }
 
+// NewService создает новый экземпляр сервиса для работы с рабочими пространствами
+// Принимает репозиторий и исполнитель DDL-команд для работы с базой данных
 func NewService(repo *Repository, ddlExec *ddl.Executor) *Service {
 	return &Service{repo: repo, ddlExec: ddlExec}
 }
 
+// Create реализует бизнес-логику создания нового рабочего пространства
+// Создает новую схему в базе данных, запись рабочего пространства и добавляет владельца
+// Возвращает созданное рабочее пространство или ошибку операции
 func (s *Service) Create(ctx context.Context, name, ownerID string) (*Workspace, error) {
 	schemaName := "data_" + strings.ReplaceAll(uuid.New().String(), "-", "")
 
@@ -38,10 +43,14 @@ func (s *Service) Create(ctx context.Context, name, ownerID string) (*Workspace,
 	return ws, nil
 }
 
+// ListByUser возвращает список всех рабочих пространств, к которым имеет доступ пользователь
+// Используется для отображения доступных рабочих пространств в интерфейсе
 func (s *Service) ListByUser(ctx context.Context, userID string) ([]*Workspace, error) {
 	return s.repo.ListByUser(ctx, userID)
 }
 
+// GetByID возвращает информацию о конкретном рабочем пространстве по его идентификатору
+// Используется для получения детальной информации о рабочем пространстве
 func (s *Service) GetByID(ctx context.Context, id string) (*types.Workspace, error) {
 	return s.repo.GetByID(ctx, id)
 }

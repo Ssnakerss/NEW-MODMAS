@@ -30,8 +30,13 @@ func (r *Repository) Create(ctx context.Context, tx pgx.Tx, s *types.Spreadsheet
 		&result.Description, &result.CreatedBy, &result.CreatedAt, &result.UpdatedAt,
 	)
 	if err != nil {
+		fmt.Println("-----------------------")
+		fmt.Printf("Error: %v\n", s)
+		fmt.Printf("Error: %v\n", err)
+		fmt.Println("-----------------------")
 		return nil, fmt.Errorf("create spreadsheet: %w", err)
 	}
+	fmt.Println("----------OK------------")
 	return result, nil
 }
 

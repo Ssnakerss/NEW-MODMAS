@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 // ─── Field ────────────────────────────────────────────────────────────────────
 
 type Field struct {
@@ -36,15 +38,15 @@ type UpdateFieldInput struct {
 // ─── Spreadsheet ──────────────────────────────────────────────────────────────
 
 type Spreadsheet struct {
-	ID          string `json:"id"`
-	WorkspaceID string `json:"workspace_id"`
-	Name        string `json:"name"`
-	TableName   string `json:"table_name"`
-	DBSchema    string `json:"db_schema,omitempty"`
-	Description string `json:"description,omitempty"`
-	CreatedBy   string `json:"created_by"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	ID          string    `json:"id"`
+	WorkspaceID string    `json:"workspace_id"`
+	Name        string    `json:"name"`
+	TableName   string    `json:"table_name"`
+	DBSchema    string    `json:"db_schema,omitempty"`
+	Description string    `json:"description,omitempty"`
+	CreatedBy   string    `json:"created_by"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type SpreadsheetWithFields struct {
@@ -64,10 +66,10 @@ type CreateSpreadsheetInput struct {
 // ─── Workspace ────────────────────────────────────────────────────────────────
 
 type Workspace struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	OwnerID   string `json:"owner_id"`
-	DBSchema  string `json:"db_schema"`
-	CreatedAt string `json:"created_at"`
-	Role      string `json:"role,omitempty"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	OwnerID   string    `json:"owner_id"`
+	DBSchema  string    `json:"db_schema"`
+	CreatedAt time.Time `json:"created_at"`
+	Role      string    `json:"role,omitempty"`
 }

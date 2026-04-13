@@ -56,7 +56,7 @@ func (s *Service) Create(ctx context.Context, input types.CreateSpreadsheetInput
 
 	ws, err := s.wsGetter.GetByID(ctx, input.WorkspaceID)
 	if err != nil {
-		return nil, fmt.Errorf("workspace not found: %w", err)
+		return nil, fmt.Errorf("workspace not found: id:%s error: %w", input.WorkspaceID, err)
 	}
 
 	tableName := "tbl_" + strings.ReplaceAll(uuid.New().String(), "-", "")

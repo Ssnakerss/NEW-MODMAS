@@ -10,6 +10,7 @@ import type { Workspace } from '../types';
 // Временная заглушка: первый workspace из store
 const MOCK_WORKSPACE_ID = '1510d01f-723a-40d4-bdfe-54692f19625f';
 
+
 export const WorkspacesPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();

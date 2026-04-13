@@ -14,6 +14,8 @@ type Service struct {
 	jwtManager *jwt.Manager
 }
 
+// NewService создает новый экземпляр сервиса аутентификации
+// Принимает репозиторий для работы с пользователями и менеджер JWT-токенов
 func NewService(repo *Repository, jwtManager *jwt.Manager) *Service {
 	return &Service{repo: repo, jwtManager: jwtManager}
 }
@@ -34,6 +36,9 @@ type AuthResponse struct {
 	User        *User  `json:"user"`
 }
 
+// Register реализует бизнес-логику регистрации нового пользователя
+// Проверяет обязательные поля, хеширует пароль, создает пользователя в БД и генерирует JWT-токен
+// Возвращает данные пользователя и токен, или ошибку валидации/операции
 func (s *Service) Register(ctx context.Context, input RegisterInput) (*AuthResponse, error) {
 	if input.Email == "" || input.Password == "" || input.Name == "" {
 		return nil, errors.New("email, password and name are required")
@@ -60,6 +65,9 @@ func (s *Service) Register(ctx context.Context, input RegisterInput) (*AuthRespo
 	return &AuthResponse{AccessToken: token, User: user}, nil
 }
 
+// Login реализует бизнес-логику аутентификации пользователя
+// Проверяет существование пользователя, сверяет пароль и генерирует JWT-токен
+// Возвращает данные пользователя и токен при успешной аутентификации, или ошибку
 func (s *Service) Login(ctx context.Context, input LoginInput) (*AuthResponse, error) {
 	user, err := s.repo.GetByEmail(ctx, input.Email)
 	if err != nil {
@@ -78,6 +86,9 @@ func (s *Service) Login(ctx context.Context, input LoginInput) (*AuthResponse, e
 	return &AuthResponse{AccessToken: token, User: user}, nil
 }
 
+// Me возвращает информацию о пользователе по его ID
+// Используется для получения данных текущего пользователя из JWT-токена
+// Возвращает данные пользователя или ошибку, если пользователь не найден
 func (s *Service) Me(ctx context.Context, userID string) (*User, error) {
 	return s.repo.GetByID(ctx, userID)
 }
