@@ -8,15 +8,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Workspace struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	OwnerID   string `json:"owner_id"`
-	DBSchema  string `json:"db_schema"`
-	CreatedAt string `json:"created_at"`
-	Role      string `json:"role,omitempty"`
-}
-
 type Repository struct {
 	pool *pgxpool.Pool
 }
@@ -25,8 +16,8 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{pool: pool}
 }
 
-func (r *Repository) Create(ctx context.Context, name, ownerID, schema string) (*Workspace, error) {
-	ws := &Workspace{}
+func (r *Repository) Create(ctx context.Context, name, ownerID, schema string) (*types.Workspace, error) {
+	ws := &types.Workspace{}
 	err := r.pool.QueryRow(ctx, `
         INSERT INTO auth.workspaces (name, owner_id, db_schema)
         VALUES ($1, $2, $3)
@@ -49,7 +40,7 @@ func (r *Repository) AddMember(ctx context.Context, workspaceID, userID, role st
 	return err
 }
 
-func (r *Repository) ListByUser(ctx context.Context, userID string) ([]*Workspace, error) {
+func (r *Repository) ListByUser(ctx context.Context, userID string) ([]*types.Workspace, error) {
 	rows, err := r.pool.Query(ctx, `
         SELECT w.id, w.name, w.owner_id, w.db_schema, w.created_at, wm.role
         FROM auth.workspaces w
@@ -62,9 +53,9 @@ func (r *Repository) ListByUser(ctx context.Context, userID string) ([]*Workspac
 	}
 	defer rows.Close()
 
-	var result []*Workspace
+	var result []*types.Workspace
 	for rows.Next() {
-		ws := &Workspace{}
+		ws := &types.Workspace{}
 		if err := rows.Scan(&ws.ID, &ws.Name, &ws.OwnerID, &ws.DBSchema, &ws.CreatedAt, &ws.Role); err != nil {
 			return nil, err
 		}

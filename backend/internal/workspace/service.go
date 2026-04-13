@@ -24,7 +24,7 @@ func NewService(repo *Repository, ddlExec *ddl.Executor) *Service {
 // Create реализует бизнес-логику создания нового рабочего пространства
 // Создает новую схему в базе данных, запись рабочего пространства и добавляет владельца
 // Возвращает созданное рабочее пространство или ошибку операции
-func (s *Service) Create(ctx context.Context, name, ownerID string) (*Workspace, error) {
+func (s *Service) Create(ctx context.Context, name, ownerID string) (*types.Workspace, error) {
 	schemaName := "data_" + strings.ReplaceAll(uuid.New().String(), "-", "")
 
 	if err := s.ddlExec.ExecRaw(ctx, ddl.BuildCreateSchema(schemaName)); err != nil {
@@ -45,7 +45,7 @@ func (s *Service) Create(ctx context.Context, name, ownerID string) (*Workspace,
 
 // ListByUser возвращает список всех рабочих пространств, к которым имеет доступ пользователь
 // Используется для отображения доступных рабочих пространств в интерфейсе
-func (s *Service) ListByUser(ctx context.Context, userID string) ([]*Workspace, error) {
+func (s *Service) ListByUser(ctx context.Context, userID string) ([]*types.Workspace, error) {
 	return s.repo.ListByUser(ctx, userID)
 }
 
